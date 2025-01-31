@@ -127,19 +127,12 @@ impl Piece {
 
 pub fn create_all_pieces() -> Vec<Piece> {
     vec![
-        // L_WIDE (5マス)
-        Piece::new(&["1110", "1100"], "L_WIDE"),
-        // Z_SHAPE (4マス)
-        Piece::new(&["1100", "0110"], "Z_SHAPE"),
-        // T_SHAPE (4マス)
-        Piece::new(&["0100", "1110"], "T_SHAPE"),
-        // REVERSE_L (4マス)
-        Piece::new(&["1000", "1110"], "REVERSE_L"),
-        // REVERSE_Z (5マス)
-        Piece::new(&["1100", "0111"], "REVERSE_Z"),
-        // T_DOWN (5マス)
-        Piece::new(&["0100", "1111"], "T_DOWN"),
-        // SHORT_LINE (3マス)
-        Piece::new(&["1110", "0000"], "SHORT_LINE"),
+        Piece::new(&["1110", "1100"], "ZIPPO"),
+        Piece::new(&["1100", "0110"], "Z"),
+        Piece::new(&["0100", "1110"], "T"),
+        Piece::new(&["1000", "1110"], "L"),
+        Piece::new(&["1100", "0111"], "LONG_Z"),
+        Piece::new(&["0100", "1111"], "LONG_T"),
+        Piece::new(&["1110", "0000"], "SHORT_BAR"),
     ]
 }
