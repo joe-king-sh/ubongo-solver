@@ -32,14 +32,14 @@ impl Solver {
         self.verbose = verbose;
     }
 
-    pub fn solve(&mut self) -> Result<bool, String> {
+    pub fn solve(&mut self) -> bool {
         if self.used_pieces.len() == self.pieces.len() {
             if self.current_board.get_state() == self.target_board.get_state() {
                 // 解が見つかったら保存して探索を続ける
                 self.solutions.push(self.used_pieces.clone());
-                return Ok(false); // 探索を続けるためにfalseを返す
+                return false; // 探索を続けるためにfalseを返す
             }
-            return Ok(false);
+            return false;
         }
 
         let pieces = self.pieces.clone();
@@ -69,7 +69,7 @@ impl Solver {
                                 position: pos,
                             });
 
-                            self.solve()?; // 結果に関わらず探索を続ける
+                            self.solve(); // 結果に関わらず探索を続ける
 
                             self.remove_piece(variant, pos);
                             self.used_pieces.pop();
@@ -79,7 +79,7 @@ impl Solver {
             }
         }
 
-        Ok(false)
+        false
     }
 
     fn can_place_piece_at_target(&self, piece: &Piece, pos: Position) -> bool {
@@ -122,10 +122,6 @@ impl Solver {
         self.used_pieces
             .iter()
             .any(|p| p.piece.get_name() == piece.get_name())
-    }
-
-    pub fn get_solution(&self) -> &[PlacedPiece] {
-        &self.used_pieces
     }
 
     pub fn get_solutions(&self) -> &[Vec<PlacedPiece>] {

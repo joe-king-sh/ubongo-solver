@@ -1,11 +1,7 @@
 pub mod board;
 pub mod piece;
 pub mod solver;
-
-pub mod utils {
-    pub mod bit_ops;
-    pub mod types;
-}
+pub mod utils;
 
 pub use board::Board;
 pub use piece::Piece;

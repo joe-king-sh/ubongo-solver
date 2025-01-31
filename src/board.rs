@@ -99,22 +99,6 @@ impl Board {
         result
     }
 
-    pub fn is_position_empty(&self, pos: Position) -> bool {
-        let (x, y) = pos;
-        if x >= self.width || y >= self.height {
-            return false;
-        }
-        !self.state.get(x, y)
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.state.not_any()
-    }
-
-    pub fn clear(&mut self) {
-        self.state.fill(false);
-    }
-
     /// ボード上の1のビットの数（面積）を返します
     pub fn area(&self) -> usize {
         let mut count = 0;
