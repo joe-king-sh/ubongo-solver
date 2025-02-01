@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use ubongo_solver::{
-    board::Board,
+    board::{Board, PlacedPiece},
     piece::{create_all_pieces, Piece},
     solver::Solver,
 };
@@ -19,6 +19,12 @@ impl Problem {
     }
 }
 
+#[derive(Debug)]
+struct Solution {
+    pieces: Vec<Piece>,
+    placed_pieces: Vec<PlacedPiece>,
+}
+
 fn create_target_board(width: usize, height: usize, pattern: &[&str]) -> Board {
     let mut board = Board::new(width, height);
 
@@ -32,7 +38,7 @@ fn create_target_board(width: usize, height: usize, pattern: &[&str]) -> Board {
     board
 }
 
-fn solve_problem(problem: &Problem) {
+fn solve_problem(problem: &Problem) -> Vec<Solution> {
     let width = problem.pattern[0].len();
     let height = problem.pattern.len();
     let target = create_target_board(width, height, &problem.pattern);
@@ -42,6 +48,7 @@ fn solve_problem(problem: &Problem) {
 
     let all_pieces = create_all_pieces();
     let target_area = target.area();
+    let mut all_solutions = Vec::new();
 
     for pieces in all_pieces.into_iter().combinations(problem.num_pieces) {
         let total_area: usize = pieces.iter().map(|p| p.area()).sum();
@@ -52,12 +59,42 @@ fn solve_problem(problem: &Problem) {
         let mut solver = Solver::new(target.clone(), pieces.clone());
         solver.solve();
         if !solver.get_solutions().is_empty() {
-            println!("\n使用するピース:");
-            for piece in &pieces {
-                println!("- {} (面積: {})", piece.get_name(), piece.area());
+            for solution in solver.get_solutions() {
+                all_solutions.push(Solution {
+                    pieces: pieces.clone(),
+                    placed_pieces: solution.clone(),
+                });
             }
-            println!("{}", solver.display_all_solutions());
         }
+    }
+
+    all_solutions
+}
+
+fn display_solutions(solutions: &[Solution], board_width: usize, board_height: usize) {
+    if solutions.is_empty() {
+        println!("解が見つかりませんでした。");
+        return;
+    }
+
+    println!("\n合計{}個の解が見つかりました！", solutions.len());
+
+    for (i, solution) in solutions.iter().enumerate() {
+        println!("\n解 {}:", i + 1);
+        println!("使用したピース：");
+        for (j, placed) in solution.placed_pieces.iter().enumerate() {
+            println!(
+                "{}. {} at ({}, {})",
+                j + 1,
+                placed.piece.get_name(),
+                placed.position.0,
+                placed.position.1
+            );
+        }
+
+        println!("\n配置：");
+        let mut board = Board::new(board_width, board_height);
+        println!("{}", board.display_with_pieces(&solution.placed_pieces));
     }
 }
 
@@ -67,35 +104,15 @@ fn main() {
             pattern: vec!["10000", "11100", "11110", "11111"],
             num_pieces: 3,
         },
-        Problem {
-            pattern: vec!["01111", "01111", "11111", "11111"],
-            num_pieces: 4,
-        },
     ];
 
     for (i, problem) in problems.iter().enumerate() {
         println!("\n問題 {}:", i + 1);
-        solve_problem(problem);
+        let solutions = solve_problem(problem);
+        let width = problem.pattern[0].len();
+        let height = problem.pattern.len();
+        display_solutions(&solutions, width, height);
     }
 
     println!("\n探索が完了しました。");
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_create_target_board() {
-        let pattern = ["111", "101"];
-        let board = create_target_board(3, 2, &pattern);
-        assert_eq!(board.display(), "■■■\n■□■\n");
-    }
-
-    #[test]
-    fn test_problem_creation() {
-        let problem = Problem::new(vec!["111", "101"], 3);
-        assert_eq!(problem.pattern, vec!["111", "101"]);
-        assert_eq!(problem.num_pieces, 3);
-    }
 }

@@ -18,6 +18,10 @@ impl Solver {
     pub fn new(target_board: Board, pieces: Vec<Piece>) -> Self {
         let width = target_board.get_width();
         let height = target_board.get_height();
+        // ピースを面積の大きい順にソート
+        let mut pieces = pieces;
+        pieces.sort_by_key(|p| std::cmp::Reverse(p.area()));
+        
         Self {
             target_board,
             pieces,
@@ -42,38 +46,36 @@ impl Solver {
             return false;
         }
 
-        let pieces = self.pieces.clone();
-        for piece in pieces {
-            if self.is_piece_used(&piece) {
-                continue;
-            }
+        // 未使用のピースのうち、最も面積の大きいものから順に試す
+        let current_piece_idx = self.used_pieces.len();
+        let piece = self.pieces[current_piece_idx].clone();
 
+        if self.verbose {
+            println!("ピース {} を試行中...", piece.get_name());
+        }
+
+        for (variant_idx, variant) in piece.get_all_variants().iter().enumerate() {
             if self.verbose {
-                println!("ピース {} を試行中...", piece.get_name());
+                println!("  バリエーション {} を試行中...", variant_idx + 1);
             }
-            for (variant_idx, variant) in piece.get_all_variants().iter().enumerate() {
-                if self.verbose {
-                    println!("  バリエーション {} を試行中...", variant_idx + 1);
-                }
-                for y in 0..self.target_board.get_height() {
-                    for x in 0..self.target_board.get_width() {
-                        let pos = (x, y);
-                        if self.can_place_piece_at_target(variant, pos) {
-                            if self.verbose {
-                                println!("    位置 ({}, {}) に配置を試行", x, y);
-                            }
-                            self.place_piece(variant, pos);
-                            self.used_pieces.push(PlacedPiece {
-                                piece: piece.clone(),
-                                variant: variant.clone(),
-                                position: pos,
-                            });
-
-                            self.solve(); // 結果に関わらず探索を続ける
-
-                            self.remove_piece(variant, pos);
-                            self.used_pieces.pop();
+            for y in 0..self.target_board.get_height() {
+                for x in 0..self.target_board.get_width() {
+                    let pos = (x, y);
+                    if self.can_place_piece_at_target(variant, pos) {
+                        if self.verbose {
+                            println!("    位置 ({}, {}) に配置を試行", x, y);
                         }
+                        self.place_piece(variant, pos);
+                        self.used_pieces.push(PlacedPiece {
+                            piece: piece.clone(),
+                            variant: variant.clone(),
+                            position: pos,
+                        });
+
+                        self.solve(); // 結果に関わらず探索を続ける
+
+                        self.remove_piece(variant, pos);
+                        self.used_pieces.pop();
                     }
                 }
             }
